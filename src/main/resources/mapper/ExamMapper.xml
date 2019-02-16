@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ustc.competition.dao.ExamMapper">
+    <resultMap id="ExamMap" type="com.ustc.competition.dataobject.TestMaster">
+        <id column="test_id" property="testId"/>
+        <result column="start_time" property="startTime" />
+        <result column="end_time" property="endTime" />
+        <result column="title" property="title" />
+        <result column="paper_id" property="paperId" />
+        <result column="status" property="status" />
+    </resultMap>
+
+    <select id="findById" resultMap="ExamMap">
+        select * from test_master where test_id = #{id}
+    </select>
+
+    <select id="findAllByPage" resultMap="ExamMap">
+        select * from test_master LIMIT #{page}, #{limit}
+    </select>
+
+    <select id="findAllBySelect" resultMap="ExamMap">
+        select * from test_master where
+        <if test="title != null">
+            title LIKE CONCAT('%',#{title},'%')
+        </if>
+        <if test="status != null">
+           AND status = #{status}
+        </if>
+        LIMIT #{page}, #{limit}
+    </select>
+
+    <insert id="save">
+        insert into test_master(test_id,start_time,end_time,title,paper_id,status) values
+        (#{testMaster.testId},#{testMaster.startTime},#{testMaster.endTime},#{testMaster.title},#{testMaster.paperId},#{testMaster.status})
+    </insert>
+
+    <update id="modify">
+        update test_master
+        <trim prefix="set" suffixOverrides=",">
+            <if test="testMaster.startTime != null">
+                start_time = #{testMaster.startTime},
+            </if>
+            <if test="testMaster.endTime != null">
+                end_time = #{testMaster.endTime},
+            </if>
+            <if test="testMaster.title != null">
+                title = #{testMaster.title},
+            </if>
+            <if test="testMaster.paperId != null">
+                paper_id = #{testMaster.paperId},
+            </if>
+            <if test="testMaster.status != null">
+                status = #{testMaster.status},
+            </if>
+        </trim>
+        where test_id = #{testMaster.testId}
+    </update>
+
+    <delete id="delete">
+        delete from test_master where test_id = #{testId}
+    </delete>
+
+</mapper>

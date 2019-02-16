@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ustc.competition.dao.PaperMapper">
+    <resultMap id="PaperMap" type="com.ustc.competition.dataobject.PaperInfo">
+        <id column="paper_id" property="paperId"/>
+        <result column="title" property="title" />
+        <result column="description" property="description" />
+        <result column="status" property="status" />
+        <result column="difficulty" property="difficulty" />
+    </resultMap>
+
+    <resultMap id="PaperQuestionMap" type="com.ustc.competition.dataobject.PaperQuestion">
+        <id column="paper_question_id" property="paperQuestionId"/>
+        <result column="paper_id" property="paperId" />
+        <result column="question_id" property="questionId" />
+    </resultMap>
+
+    <select id="findById" resultMap="PaperMap">
+        select * from paper_info where paper_id = #{paperId}
+    </select>
+
+    <select id="findByPage" resultMap="PaperMap">
+        select * from paper_info LIMIT #{page},#{limit}
+    </select>
+
+    <select id="findBySelect" resultMap="PaperMap">
+        select * from paper_info where
+        <if test="paperInfo.title != null">
+            title LIKE CONCAT('%',#{paperInfo.title},'%')
+        </if>
+        <if test="paperInfo.status != null">
+            AND status = #{paperInfo.status}
+        </if>
+        <if test="paperInfo.difficulty != null">
+            AND difficulty = #{paperInfo.difficulty}
+        </if>
+        LIMIT #{page},#{limit}
+    </select>
+
+    <select id="findAll" resultMap="PaperQuestionMap">
+        select * from paper_question
+    </select>
+
+    <insert id="save" >
+        insert into `paper_info`(paper_id, title, description, status, difficulty)
+        values (#{paperForm.id}, #{paperForm.title}, #{paperForm.description}, #{paperForm.status}, #{paperForm.difficulty})
+    </insert>
+
+    <insert id="saveQuestionId">
+        insert into `paper_question`(paper_question_id, paper_id, question_id) values
+        <foreach collection="list" item="item" separator=",">
+            (#{item.paperQuestionId}, #{item.paperId}, #{item.questionId})
+        </foreach>
+    </insert>
+
+    <update id="modify" >
+        update paper_info
+        <trim prefix="set" suffixOverrides=",">
+            <if test="form.title != null">
+                title = #{form.title},
+            </if>
+            <if test="form.description != null">
+                description = #{form.description},
+            </if>
+            <if test="form.status != null">
+                status = #{form.status},
+            </if>
+            <if test="form.difficulty != null">
+                difficulty = #{form.difficulty}
+            </if>
+        </trim>
+        where paper_id = #{form.id}
+    </update>
+    <!--删除paper_question里的数据-->
+    <delete id="remove">
+        delete from paper_question where paper_id = #{paperId}
+    </delete>
+
+    <!--删除paper_info里的数据-->
+    <delete id="delete">
+        delete from paper_info where paper_id = #{paperId}
+    </delete>
+
+
+</mapper>

@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ustc.competition.dao.QuestionMapper">
+    <resultMap id="QuestionMap" type="com.ustc.competition.dataobject.QuestionInfo">
+        <id column="question_id" property="questionId" jdbcType="VARCHAR"/>
+        <result column="question_content" property="questionContent" jdbcType="VARCHAR"/>
+        <result column="question_type" property="questionType" jdbcType="VARCHAR"/>
+        <result column="question_group" property="questionGroup" jdbcType="VARCHAR"/>
+        <result column="question_difficulty" property="questionDifficulty" jdbcType="INTEGER"/>
+        <result column="question_status" property="questionStatus" jdbcType="INTEGER"/>
+        <result column="question_select_a" property="questionSelectA" jdbcType="VARCHAR"/>
+        <result column="question_select_b" property="questionSelectB" jdbcType="VARCHAR"/>
+        <result column="question_select_c" property="questionSelectC" jdbcType="VARCHAR"/>
+        <result column="question_select_d" property="questionSelectD" jdbcType="VARCHAR"/>
+        <result column="question_answer" property="questionAnswer" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <select id="selectById" resultMap="QuestionMap" parameterType="java.lang.String">
+        select *
+        from `question_info`
+        where question_id = #{questionId}
+    </select>
+
+    <select id="selectByIds" resultMap="QuestionMap">
+        select *
+        from `question_info` where question_id in
+        <foreach collection="list" item="item" separator="," open="(" close=")" index="">
+            #{item}
+        </foreach>
+    </select>
+
+    <select id="selectAllBySelect" resultMap="QuestionMap" >
+        SELECT *
+        FROM `question_info`
+        WHERE
+        <if test="questionInfo.content != null">
+            question_content like CONCAT('%',#{questionInfo.content},'%')
+        </if>
+        <if test="questionInfo.type != null">
+            AND question_type = #{questionInfo.type}
+        </if>
+        <if test="questionInfo.group != null">
+            AND question_group = #{questionInfo.group}
+        </if>
+        <if test="questionInfo.difficulty != null">
+            AND question_difficulty = #{questionInfo.difficulty}
+        </if>
+        LIMIT #{questionInfo.page},#{questionInfo.limit}
+    </select>
+
+    <insert id="save">
+        insert into question_info(question_id,
+                             question_content,
+                             question_type,
+                             question_group,
+                             question_difficulty,
+                             question_status,
+                             question_select_a,
+                             question_select_b,
+                             question_select_c,
+                             question_select_d,
+                             question_answer)
+        value (#{questionId,jdbcType=VARCHAR},
+               #{questionForm.content,jdbcType=VARCHAR},
+               #{questionForm.type,jdbcType=VARCHAR},
+               #{questionForm.group,jdbcType=VARCHAR},
+               #{questionForm.difficulty,jdbcType=INTEGER},
+               #{questionForm.status,jdbcType=INTEGER},
+               #{questionForm.a,jdbcType=VARCHAR},
+               #{questionForm.b,jdbcType=VARCHAR},
+               #{questionForm.c,jdbcType=VARCHAR},
+               #{questionForm.d,jdbcType=VARCHAR},
+               #{questionForm.answer,jdbcType=VARCHAR})
+    </insert>
+
+    <update id="modify">
+        update question_info
+        <trim prefix="set" suffixOverrides=",">
+            <if test="question.content!=null">question_content=#{question.content},</if>
+            <if test="question.type!=null">question_type=#{question.type},</if>
+            <if test="question.group!=null">question_group=#{question.group},</if>
+            <if test="question.difficulty!=null">question_difficulty=#{question.difficulty},</if>
+            <if test="question.status!=null">question_status=#{question.status},</if>
+            <if test="question.a!=null">question_select_a=#{question.a},</if>
+            <if test="question.b!=null">question_select_b=#{question.b},</if>
+            <if test="question.c!=null">question_select_c=#{question.c},</if>
+            <if test="question.d!=null">question_select_d=#{question.d},</if>
+            <if test="question.answer!=null">question_answer=#{question.answer},</if>
+        </trim>
+        where question_id = #{question.id}
+    </update>
+
+    <delete id="delete">
+        delete from question_info where question_id = #{deleteId}
+    </delete>
+
+    <select id="selectAllByPaperid" resultMap="QuestionMap">
+        select * from question_info as qi INNER JOIN paper_question as pq
+        on qi.question_id = pq.question_id where pq.paper_id = #{paperId} LIMIT #{page}, #{limit}
+    </select>
+
+    <select id="selectAllByKey" resultMap="QuestionMap">
+        select * from question_info where
+        <if test="keyWord != null">
+            question_content like CONCAT('%',#{keyWord},'%')
+        </if>
+        <if test="keyWord != null">
+            or question_group like CONCAT('%',#{keyWord},'%')
+        </if>
+        LIMIT #{page}, #{limit}
+    </select>
+
+
+</mapper>
